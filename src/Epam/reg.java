@@ -7,9 +7,15 @@ package Epam;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 
 
 
@@ -24,6 +30,7 @@ public class reg extends javax.swing.JFrame {
      */
     public reg() {
         initComponents();
+        table_updete();
     }
 
     /**
@@ -70,8 +77,18 @@ public class reg extends javax.swing.JFrame {
         });
 
         jButton2.setText("dit");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Delet");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -139,6 +156,11 @@ public class reg extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -175,6 +197,41 @@ public class reg extends javax.swing.JFrame {
  
       Connection con1;
       PreparedStatement insert;
+      private void table_updete()
+      {
+       int c;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con1=DriverManager.getConnection("jdbc:mysql://localhost/epam","root","12345");
+            insert=con1.prepareStatement("select*from record");
+       ResultSet rs=insert.executeQuery(); 
+       ResultSetMetaData Rss=rs.getMetaData();
+       c=Rss.getColumnCount();
+       DefaultTableModel Df=( DefaultTableModel)jTable1.getModel();
+       Df.setRowCount(0);
+     
+      
+       while(rs.next())
+       {
+           Vector v2 =new Vector();
+           for(int a=1;a<=c;a++)
+           {
+            v2.add(rs.getString("id"));
+            v2.add(rs.getString("name"));
+            v2.add(rs.getString("mobile"));
+            v2.add(rs.getString("course"));
+           }
+           Df.addRow(v2);
+       } 
+         
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (SQLException ex) {
+            Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
+    }                                        
+}
+        
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         
@@ -185,14 +242,117 @@ public class reg extends javax.swing.JFrame {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             con1=DriverManager.getConnection("jdbc:mysql://localhost/epam","root","12345");
-            insert=con1.prepareStatement("insert into record("name,mobile,course")valuse(?,?,?)");
-        
+            insert=con1.prepareStatement("insert into record(name,mobile,course)values(?,?,?)");
+       
+            insert.setString(1, name);
+            insert.setString(2, mobile);
+            insert.setString(3, course);
+            insert.executeUpdate();
+            JOptionPane.showMessageDialog(this,"record addedd");
+              table_updete();
+            
+            txtname.setText("");
+          txtmobile.setText("");
+           txtcourse.setText("");
+            
+               txtname.requestFocus();
+            
+            
+            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
         }
         catch (SQLException ex) {
             Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        // TODO add your handling code here:
+               DefaultTableModel Df=( DefaultTableModel)jTable1.getModel();
+
+               int selectedIndex = jTable1.getSelectedRow();
+               txtname.setText(Df.getValueAt(selectedIndex, 1).toString());
+               txtmobile.setText(Df.getValueAt(selectedIndex,2).toString());
+               txtcourse.setText(Df.getValueAt(selectedIndex, 3).toString());
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+         DefaultTableModel Df=( DefaultTableModel)jTable1.getModel();
+          int selectedIndex = jTable1.getSelectedRow();
+           try {
+               
+           int id =Integer.parseInt(Df.getValueAt(selectedIndex, 0).toString());
+           String name = txtname.getText();
+           String mobile=txtmobile.getText();
+           String course=txtcourse.getText();
+        
+            Class.forName("com.mysql.jdbc.Driver");
+            con1=DriverManager.getConnection("jdbc:mysql://localhost/epam","root","12345");
+            insert=con1.prepareStatement("update record set name =?,mobile=?, course=? where id =?");
+       
+            insert.setString(1, name);
+            insert.setString(2, mobile);
+            insert.setString(3, course);
+            insert.setInt(4, id);
+            
+            insert.executeUpdate();
+            JOptionPane.showMessageDialog(this,"Record update");
+              table_updete();
+            
+            txtname.setText("");
+          txtmobile.setText("");
+           txtcourse.setText("");
+            
+               txtname.requestFocus();
+            
+            
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (SQLException ex) {
+            Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
+    }                                        
+
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+         DefaultTableModel Df=( DefaultTableModel)jTable1.getModel();
+          int selectedIndex = jTable1.getSelectedRow();
+             try {
+               
+           int id =Integer.parseInt(Df.getValueAt(selectedIndex, 0).toString());
+           int dialogResult =JOptionPane.showConfirmDialog(null,"Do you want to Delete the Recorde","warning",JOptionPane.YES_NO_OPTION);
+           if (dialogResult==JOptionPane.YES_OPTION){
+               
+             Class.forName("com.mysql.jdbc.Driver");
+            con1=DriverManager.getConnection("jdbc:mysql://localhost/epam","root","12345");
+            insert=con1.prepareStatement("Delete from record where id =?");
+            
+            insert.setInt(1, id);
+             insert.executeUpdate();
+            JOptionPane.showMessageDialog(this,"Record Delete");
+              table_updete();
+            
+            txtname.setText("");
+          txtmobile.setText("");
+           txtcourse.setText("");
+              txtname.requestFocus();
+               
+           }
+           
+           
+        
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (SQLException ex) {
+            Logger.getLogger(reg.class.getName()).log(Level.SEVERE, null, ex);
+    }                       
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
